@@ -18,7 +18,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 5. Instalacja zależności Node.js
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # 6. Kopiowanie reszty kodu aplikacji
 COPY . .
