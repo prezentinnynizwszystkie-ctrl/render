@@ -1,0 +1,30 @@
+FROM node:18-slim
+
+# 1. Instalacja systemu i niezbędnych narzędzi
+# - ffmpeg: do obróbki wideo
+# - dumb-init: proces init dla kontenerów (zapobiega problemom z procesami zombie)
+RUN apt-get update && \
+    apt-get install -y ffmpeg dumb-init && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 2. Ustawienie zmiennej środowiskowej
+ENV NODE_ENV=production
+
+# 3. Katalog roboczy w kontenerze
+WORKDIR /app
+
+# 4. Kopiowanie plików zależności (dla lepszego cache'owania warstw Dockera)
+COPY package*.json ./
+
+# 5. Instalacja zależności Node.js
+RUN npm ci --only=production
+
+# 6. Kopiowanie reszty kodu aplikacji
+COPY . .
+
+# 7. Utworzenie katalogu tymczasowego
+RUN mkdir -p temp && chmod 777 temp
+
+# 8. Komenda startowa
+CMD ["dumb-init", "node", "index.js"]
